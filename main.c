@@ -20,7 +20,7 @@ int main()
 
 void init()
 {
-    system("color 60");
+    system("color 30");
     print("In The Name Of God", 0, 1);
     print("Ultimate Football Manager\n", 0, 1);
     print("\"Cyan\" Team Project", 0, 1);
@@ -43,10 +43,14 @@ void start()
     {
         if(counter_temp != arrow_counter){
 			system("cls");
+			puts("");
+            print("                           ", 2, 1);
+            print(" Ultimate Football Manager ", 2, 1);
+            print("                           ", 2, 1);
+            puts("");
         	switch (arrow_counter)
         	{
             	case 0 :
-            	    puts("\n\n\n\n");
             	    print("                        ", 1, 1);
                 	print("        New Game        ", 1, 1);
             	    print("                        ", 1, 1);
@@ -55,7 +59,6 @@ void start()
             	    print("                        ", 0, 1);
                 	break;
             	case 1 :
-            	    puts("\n\n\n\n");
             	    print("                        ", 0, 1);
                 	print("        New Game        ", 0, 1);
             	    print("                        ", 0, 1);
@@ -108,6 +111,9 @@ void print(char *s, int clr, int align)
             break;
         case 1 :
             SetConsoleTextAttribute(hConsole, BACKGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
+            break;
+        case 2 :
+            SetConsoleTextAttribute(hConsole, BACKGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY / 3| FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
             break;
     }
 
