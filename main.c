@@ -7,10 +7,9 @@ int arrow_counter = 0;
 
 void init();
 void start();
-void print(char *, int);
+void print(char *, int, int);
 int windowsWindowWidth();
 int arrow(int);
-int color(int);
 
 int main()
 {
@@ -21,15 +20,15 @@ int main()
 
 void init()
 {
-
-    print("In The Name Of God", color(0));
-    print("Ultimate Football Manager\n", color(0));
-    print("\"Cyan\" Team Project", color(0));
-    print("By:", color(0));
-    print("Arian Tashakor", color(0));
-    print("Mehrdad Khanzadeh", color(0));
-    print("Hessam Hashemizadeh\n", color(0));
-    print("Press Any Key To Start Game...", color(0));
+    system("color 60");
+    print("In The Name Of God", 0, 1);
+    print("Ultimate Football Manager\n", 0, 1);
+    print("\"Cyan\" Team Project", 0, 1);
+    print("By:", 0, 1);
+    print("Arian Tashakor", 0, 1);
+    print("Mehrdad Khanzadeh", 0, 1);
+    print("Hessam Hashemizadeh\n", 0, 1);
+    print("Press Any Key To Start Game...", 0, 1);
     //Watch Out!
     getch();
     system("cls");
@@ -47,12 +46,22 @@ void start()
         	switch (arrow_counter)
         	{
             	case 0 :
-                	print("New Game", color(1));
-                	print("Continue Previous Save", color(0));
+            	    puts("\n\n\n\n");
+            	    print("                        ", 1, 1);
+                	print("        New Game        ", 1, 1);
+            	    print("                        ", 1, 1);
+            	    print("                        ", 0, 1);
+                	print(" Continue Previous Save ", 0, 1);
+            	    print("                        ", 0, 1);
                 	break;
             	case 1 :
-                	print("New Game", color(0));
-                	print("Continue Previous Save", color(1));
+            	    puts("\n\n\n\n");
+            	    print("                        ", 0, 1);
+                	print("        New Game        ", 0, 1);
+            	    print("                        ", 0, 1);
+            	    print("                        ", 1, 1);
+                	print(" Continue Previous Save ", 1, 1);
+            	    print("                        ", 1, 1);
                 	break;
         	}
 		}
@@ -60,7 +69,7 @@ void start()
     }
 }
 
-int windowsWindowWidth()
+int windowsWindowWidth(int type)
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns, rows;
@@ -69,17 +78,41 @@ int windowsWindowWidth()
     columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
-    return columns;
+    if (type)
+        return columns;
+    return rows;
 }
 
-void print(char *s, int clr)
+void print(char *s, int clr, int align)
 {
-    const int total_width = windowsWindowWidth();
+    const int total_width = windowsWindowWidth(1);
     const int s_width = strlen(s);
-    const int field_width = (total_width - s_width) / 2 + s_width;
+    const int field_width = (total_width - s_width) / 2;
 
-    printf("%*s\n", field_width, s);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+    WORD saved_attributes;
+    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
+    saved_attributes = consoleInfo.wAttributes;
 
+    if (align)
+    {
+        int i;
+        for (i = 0; i < field_width; i++)
+            printf(" ");
+    }
+    switch (clr)
+    {
+        case 0 :
+            SetConsoleTextAttribute(hConsole, BACKGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY | FOREGROUND_GREEN);
+            break;
+        case 1 :
+            SetConsoleTextAttribute(hConsole, BACKGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
+            break;
+    }
+
+    printf("%s\n", s);
+    SetConsoleTextAttribute(hConsole, saved_attributes);
     return;
 }
 
@@ -98,9 +131,3 @@ int arrow(int page_items)
       puts ( "Right arrow is pressed" );
 	*/
 }
-
-int color(int type)
-{
-    return 0;
-}
-
