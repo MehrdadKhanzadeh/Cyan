@@ -1,5 +1,3 @@
-//ITNOG
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -40,23 +38,25 @@ void init()
 
 void start()
 {
-    char c = getchar();
     short esc = 0;
-
+	int counter_temp = 9;
     while (arrow(2))
     {
-        system("cls");
-        switch (arrow_counter)
-        {
-            case 0 :
-                print("New Game", color(1));
-                print("Continue Previous Save", color(0));
-                break;
-            case 1 :
-                print("New Game", color(0));
-                print("Continue Previous Save", color(1));
-                break;
-        }
+        if(counter_temp != arrow_counter){
+			system("cls");
+        	switch (arrow_counter)
+        	{
+            	case 0 :
+                	print("New Game", color(1));
+                	print("Continue Previous Save", color(0));
+                	break;
+            	case 1 :
+                	print("New Game", color(0));
+                	print("Continue Previous Save", color(1));
+                	break;
+        	}
+		}
+		counter_temp = arrow_counter;
     }
 }
 
@@ -103,3 +103,4 @@ int color(int type)
 {
     return 0;
 }
+
