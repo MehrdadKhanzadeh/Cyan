@@ -7,28 +7,34 @@ int arrow_counter = 0;
 
 void init();
 void start();
+void game();
 void print(char *, int, int);
 int windowsWindowWidth();
-int arrow(int);
+void arrow(int);
 
 int main()
 {
     init();
     start();
+    game();
     return 0;
 }
 
 void init()
 {
     system("color 30");
-    print("In The Name Of God", 0, 1);
-    print("Ultimate Football Manager\n", 0, 1);
-    print("\"Cyan\" Team Project", 0, 1);
-    print("By:", 0, 1);
-    print("Arian Tashakor", 0, 1);
-    print("Mehrdad Khanzadeh", 0, 1);
-    print("Hessam Hashemizadeh\n", 0, 1);
-    print("Press Any Key To Start Game...", 0, 1);
+    print("", 0, 1);
+    print("                                ", 0, 1);
+    print("      In The Name Of God        ", 0, 1);
+    print("   Ultimate Football Manager    ", 0, 1);
+    print("                                ", 0, 1);
+    print("      \"Cyan\" Team Project       ", 0, 1);
+    print("              By:               ", 0, 1);
+    print("         Arian Tashakor         ", 0, 1);
+    print("        Mehrdad Khanzadeh       ", 0, 1);
+    print("       Hessam Hashemizadeh      ", 0, 1);
+    print("                                ", 0, 1);
+    print(" Press Any Key To Start Game... ", 0, 1);
     //Watch Out!
     getch();
     system("cls");
@@ -37,11 +43,12 @@ void init()
 
 void start()
 {
-    short esc = 0;
-	int counter_temp = 9;
-    while (arrow(2))
+	int counter_temp = 1;
+    while (TRUE)
     {
-        if(counter_temp != arrow_counter){
+        arrow(2);
+        if(counter_temp != arrow_counter)
+        {
 			system("cls");
 			puts("");
             print("                           ", 2, 1);
@@ -51,24 +58,139 @@ void start()
         	switch (arrow_counter)
         	{
             	case 0 :
-            	    print("                        ", 1, 1);
-                	print("        New Game        ", 1, 1);
-            	    print("                        ", 1, 1);
-            	    print("                        ", 0, 1);
-                	print(" Continue Previous Save ", 0, 1);
-            	    print("                        ", 0, 1);
+            	    print("                           ", 1, 1);
+                	print("         New Game          ", 1, 1);
+            	    print("                           ", 1, 1);
+            	    print("                           ", 0, 1);
+                	print("  Continue Previous Save   ", 0, 1);
+            	    print("                           ", 0, 1);
                 	break;
             	case 1 :
-            	    print("                        ", 0, 1);
-                	print("        New Game        ", 0, 1);
-            	    print("                        ", 0, 1);
-            	    print("                        ", 1, 1);
-                	print(" Continue Previous Save ", 1, 1);
-            	    print("                        ", 1, 1);
+            	    print("                           ", 0, 1);
+                	print("         New Game          ", 0, 1);
+            	    print("                           ", 0, 1);
+            	    print("                           ", 1, 1);
+                	print("  Continue Previous Save   ", 1, 1);
+            	    print("                           ", 1, 1);
                 	break;
         	}
 		}
 		counter_temp = arrow_counter;
+		int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
+        if (isReturnPressed)
+            break;
+    }
+}
+
+void game()
+{
+    if (arrow_counter == 0)
+    {
+        int counter_temp = 1;
+        while (TRUE)
+        {
+            arrow(5);
+            if(counter_temp != arrow_counter){
+            system("cls");
+            puts("");
+            print("                           ", 2, 1);
+            print(" Ultimate Football Manager ", 2, 1);
+            print("                           ", 2, 1);
+            puts("");
+            switch (arrow_counter)
+            {
+                case 0 :
+                    print("                           ", 1, 1);
+                    print("          Lineup           ", 1, 1);
+                    print("                           ", 1, 1);
+                    print("                           ", 0, 1);
+                    print("          Proceed          ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Table           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Save            ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Exit            ", 0, 1);
+                    print("                           ", 0, 1);
+                    break;
+                case 1 :
+                    print("                           ", 0, 1);
+                    print("          Lineup           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 1, 1);
+                    print("          Proceed          ", 1, 1);
+                    print("                           ", 1, 1);
+                    print("                           ", 0, 1);
+                    print("           Table           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Save            ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Exit            ", 0, 1);
+                    print("                           ", 0, 1);
+                    break;
+                case 2 :
+                    print("                           ", 0, 1);
+                    print("          Lineup           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("          Proceed          ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 1, 1);
+                    print("           Table           ", 1, 1);
+                    print("                           ", 1, 1);
+                    print("                           ", 0, 1);
+                    print("           Save            ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Exit            ", 0, 1);
+                    print("                           ", 0, 1);
+                    break;
+                case 3 :
+                    print("                           ", 0, 1);
+                    print("          Lineup           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("          Proceed          ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Table           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 1, 1);
+                    print("           Save            ", 1, 1);
+                    print("                           ", 1, 1);
+                    print("                           ", 0, 1);
+                    print("           Exit            ", 0, 1);
+                    print("                           ", 0, 1);
+                    break;
+                case 4 :
+                    print("                           ", 0, 1);
+                    print("          Lineup           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("          Proceed          ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Table           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("           Save            ", 0, 1);
+                    print("                           ", 0, 1);
+                    print("                           ", 1, 1);
+                    print("           Exit            ", 1, 1);
+                    print("                           ", 1, 1);
+                    break;
+                }
+            }
+            counter_temp = arrow_counter;
+            int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
+            if (isReturnPressed)
+                break;
+        }
     }
 }
 
@@ -122,15 +244,13 @@ void print(char *s, int clr, int align)
     return;
 }
 
-int arrow(int page_items)
+void arrow(int page_items)
 {
 	if (GetAsyncKeyState(VK_UP) & SHRT_MAX)
     	arrow_counter = (arrow_counter + page_items - 1) % page_items;
 	else if (GetAsyncKeyState(VK_DOWN) & SHRT_MAX)
     	arrow_counter = (arrow_counter + page_items + 1) % page_items;
-    else if (GetAsyncKeyState(VK_RETURN))
-        return 0;
-    return 1;
+    return;
 	/*else if ( GetAsyncKeyState ( VK_LEFT ) & SHRT_MAX )
       puts ( "Left arrow is pressed" );
     else if ( GetAsyncKeyState ( VK_RIGHT ) & SHRT_MAX )
