@@ -20,7 +20,7 @@ int main()
     init();
     start();
     teamLists();
-    game();
+    //game();
     return 0;
 }
 
@@ -200,8 +200,8 @@ void game()
 
 void teamLists()
 {
-    FILE *f = fopen("teams\teams.csv", "r");
-    char team[16][100];
+    FILE *f = fopen("Teams/teams.csv", "r");
+    char team[16][30];
     int i, j;
     for (i = 0; i < 16; i++)
         fgets(team[i], 100, f);
@@ -230,9 +230,12 @@ void teamLists()
                     else
                     {
                         //printSpace((27 - strlen(team[i])) / 2, 1, 0);
-                        print(team[i], 1, 0);
+                        print(team[i], 0, 1);
                         //printSpace(27 - (27 - strlen(team[i])) / 2, 1, 0);
                     }
+                    int j;
+                    for (j = 0; j < windowsWindowWidth(); j++)
+                        printf("\b");
                 }
             }
             counter_temp = arrow_counter;
@@ -288,7 +291,12 @@ void print(char *s, int clr, int align)
             break;
     }
 
-    printf("%s\n", s);
+    printf("%s", s);
+    int i;
+    if (!align)
+        for (i = 0; i < 27 - strlen(s); i++)
+            printf(" ");
+    puts("");
     SetConsoleTextAttribute(hConsole, saved_attributes);
     return;
 }
