@@ -201,7 +201,7 @@ void game()
 void teamLists()
 {
     FILE *f = fopen("teams\teams.csv", "r");
-    char *team[16];
+    char team[16][100];
     int i, j;
     for (i = 0; i < 16; i++)
         fgets(team[i], 100, f);
