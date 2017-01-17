@@ -37,7 +37,7 @@ typedef struct Team
     int mid;
     int attack;
     int form;
-
+    //Revision required	
     Player players[11];
 } Team;
 
