@@ -4,23 +4,51 @@
 #include <limits.h>
 
 int arrow_counter = 0;
-char *team_name;
 
 void init();
 void start();
 void teamLists();
 void game();
+void lineup();
 void print(char *, int, int);
 void printSpace(int, int, int);
 int windowsWindowWidth();
 void arrow(int);
+
+typedef struct Player
+{
+    char *name;
+    int age;
+    int number;
+
+    int skill;
+    int form;
+    int fitness;
+
+    char original_post;
+    char post;
+} Player;
+
+typedef struct Team
+{
+    char *name;
+
+    int defence;
+    int mid;
+    int attack;
+    int form;
+
+    Player players[11];
+} Team;
+
+Team user;
 
 int main()
 {
     init();
     start();
     teamLists();
-    //game();
+    game();
     return 0;
 }
 
@@ -88,113 +116,118 @@ void start()
 
 void game()
 {
-    if (arrow_counter == 0)
+    //printf("%s", team_name);
+    arrow_counter = 0;
+    int counter_temp = 1;
+    while (TRUE)
     {
-        int counter_temp = 1;
-        while (TRUE)
+        arrow(5);
+        if(counter_temp != arrow_counter){
+        system("cls");
+        puts("");
+        print("                           ", 2, 1);
+        print(" Ultimate Football Manager ", 2, 1);
+        print("                           ", 2, 1);
+        puts("");
+        switch (arrow_counter)
         {
-            arrow(5);
-            if(counter_temp != arrow_counter){
-            system("cls");
-            puts("");
-            print("                           ", 2, 1);
-            print(" Ultimate Football Manager ", 2, 1);
-            print("                           ", 2, 1);
-            puts("");
-            switch (arrow_counter)
-            {
-                case 0 :
-                    print("                           ", 1, 1);
-                    print("          Lineup           ", 1, 1);
-                    print("                           ", 1, 1);
-                    print("                           ", 0, 1);
-                    print("          Proceed          ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Table           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Save            ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Exit            ", 0, 1);
-                    print("                           ", 0, 1);
-                    break;
-                case 1 :
-                    print("                           ", 0, 1);
-                    print("          Lineup           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 1, 1);
-                    print("          Proceed          ", 1, 1);
-                    print("                           ", 1, 1);
-                    print("                           ", 0, 1);
-                    print("           Table           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Save            ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Exit            ", 0, 1);
-                    print("                           ", 0, 1);
-                    break;
-                case 2 :
-                    print("                           ", 0, 1);
-                    print("          Lineup           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("          Proceed          ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 1, 1);
-                    print("           Table           ", 1, 1);
-                    print("                           ", 1, 1);
-                    print("                           ", 0, 1);
-                    print("           Save            ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Exit            ", 0, 1);
-                    print("                           ", 0, 1);
-                    break;
-                case 3 :
-                    print("                           ", 0, 1);
-                    print("          Lineup           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("          Proceed          ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Table           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 1, 1);
-                    print("           Save            ", 1, 1);
-                    print("                           ", 1, 1);
-                    print("                           ", 0, 1);
-                    print("           Exit            ", 0, 1);
-                    print("                           ", 0, 1);
-                    break;
-                case 4 :
-                    print("                           ", 0, 1);
-                    print("          Lineup           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("          Proceed          ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Table           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("           Save            ", 0, 1);
-                    print("                           ", 0, 1);
-                    print("                           ", 1, 1);
-                    print("           Exit            ", 1, 1);
-                    print("                           ", 1, 1);
-                    break;
-                }
-            }
-            counter_temp = arrow_counter;
-            int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
-            if (isReturnPressed)
+            case 0 :
+                print("                           ", 1, 1);
+                print("          Lineup           ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("          Proceed          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Table           ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Save            ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Exit            ", 0, 1);
+                print("                           ", 0, 1);
                 break;
+            case 1 :
+                print("                           ", 0, 1);
+                print("          Lineup           ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("          Proceed          ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("           Table           ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Save            ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Exit            ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 2 :
+                print("                           ", 0, 1);
+                print("          Lineup           ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("          Proceed          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("           Table           ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("           Save            ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Exit            ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 3 :
+                print("                           ", 0, 1);
+                print("          Lineup           ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("          Proceed          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Table           ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("           Save            ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("           Exit            ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 4 :
+                print("                           ", 0, 1);
+                print("          Lineup           ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("          Proceed          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Table           ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("           Save            ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("           Exit            ", 1, 1);
+                print("                           ", 1, 1);
+                break;
+            }
         }
+        counter_temp = arrow_counter;
+        int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
+        if (isReturnPressed)
+            break;
+    }
+    switch (arrow_counter)
+    {
+        case 0 :
+            lineup();
+            break;
     }
 }
 
@@ -204,7 +237,10 @@ void teamLists()
     char team[16][30];
     int i, j;
     for (i = 0; i < 16; i++)
+    {
         fgets(team[i], 100, f);
+        team[i][strlen(team[i]) - 1] = '\0';
+    }
     if (arrow_counter == 0)
     {
         int counter_temp = 1;
@@ -219,8 +255,19 @@ void teamLists()
                 print(" Ultimate Football Manager ", 2, 1);
                 print("                           ", 2, 1);
                 puts("");
+                print("                           ", 2, 1);
+                print("      Select Your Team     ", 2, 1);
+                print("                           ", 2, 1);
+                puts("");
                 for (i = 0; i < 16; i++)
                 {
+                    /*int j, k;
+                    for (j = 0; j < (27 - strlen(team[i])) / 2; j++)
+                    {
+                        print(" ", 1, 0);
+                        for (k = 0; k < windowsWindowWidth(); k++)
+                            printf("\b");
+                    }*/
                     if (arrow_counter == i)
                     {
                         //printSpace((27 - strlen(team[i])) / 2, 1, 1);
@@ -233,17 +280,129 @@ void teamLists()
                         print(team[i], 0, 1);
                         //printSpace(27 - (27 - strlen(team[i])) / 2, 1, 0);
                     }
-                    int j;
-                    for (j = 0; j < windowsWindowWidth(); j++)
-                        printf("\b");
                 }
             }
+            user.name = team[arrow_counter];
             counter_temp = arrow_counter;
             int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
             if (isReturnPressed)
                 break;
         }
     }
+}
+
+void lineup()
+{
+    arrow_counter = 0;
+    int counter_temp = 1;
+    while (TRUE)
+    {
+        arrow(3);
+        if(counter_temp != arrow_counter){
+        system("cls");
+        puts("");
+        print("                           ", 2, 1);
+        print(" Ultimate Football Manager ", 2, 1);
+        print("                           ", 2, 1);
+        puts("");
+        switch (arrow_counter)
+        {
+            case 0 :
+                print("                           ", 1, 1);
+                print("        4 - 4 - 2          ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        5 - 4 - 1          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        4 - 3 - 3          ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 1 :
+                print("                           ", 0, 1);
+                print("        4 - 4 - 2          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        5 - 4 - 1          ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        4 - 3 - 3          ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 2 :
+                print("                           ", 0, 1);
+                print("        4 - 4 - 2          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        5 - 4 - 1          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        4 - 3 - 3          ", 1, 1);
+                print("                           ", 1, 1);
+                break;
+        }
+        }
+        counter_temp = arrow_counter;
+        int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
+        if (isReturnPressed)
+            break;
+    }
+    arrow_counter = 0;
+    counter_temp = 1;
+    while (TRUE)
+    {
+        arrow(3);
+        if(counter_temp != arrow_counter){
+        system("cls");
+        puts("");
+        print("                           ", 2, 1);
+        print(" Ultimate Football Manager ", 2, 1);
+        print("                           ", 2, 1);
+        puts("");
+        switch (arrow_counter)
+        {
+            case 0 :
+                print("                           ", 1, 1);
+                print("        4 - 4 - 2          ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        5 - 4 - 1          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        4 - 3 - 3          ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 1 :
+                print("                           ", 0, 1);
+                print("        4 - 4 - 2          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        5 - 4 - 1          ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        4 - 3 - 3          ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 2 :
+                print("                           ", 0, 1);
+                print("        4 - 4 - 2          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        5 - 4 - 1          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        4 - 3 - 3          ", 1, 1);
+                print("                           ", 1, 1);
+                break;
+        }
+        }
+        counter_temp = arrow_counter;
+        user.form = arrow_counter;
+        int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
+        if (isReturnPressed)
+            break;
+    }
+
 }
 
 int windowsWindowWidth(int type)
