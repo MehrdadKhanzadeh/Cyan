@@ -3,9 +3,11 @@
 #include <string.h>
 #include <string>
 
+//update the original structures with these additions (below)
 typedef struct Player
 {
-	char *name;
+	//change required in order to prevent access violation
+	char name[50];
 	int age;
 	int number;
 
@@ -19,13 +21,16 @@ typedef struct Player
 
 typedef struct Team
 {
-	char *name;
+	//change required in order to prevent access violation
+	char name[50];
 
 	int defence;
 	int mid;
 	int attack;
 	int form;
-
+	//added this field
+	int player_count;
+	
 	Player players[35];
 } Team;
 
@@ -117,6 +122,8 @@ void Import_team(char* team_name)
 		perror("Can't Open File: ");
 		exit(-1);
 	}
+	//added this line
+	strcpy(Teams[j].name , team_name);
 	char tmp[200];
 	char * ptr;
 	int k = 0;
@@ -137,5 +144,7 @@ void Import_team(char* team_name)
 		sscanf(ptr, "%d,%c,%d,%d,%d", &Teams[j].players[k].age, &Teams[j].players[k].original_post, &Teams[j].players[k].skill, &Teams[j].players[k].form, &Teams[j].players[k].fitness);
 		k++;
 	}
+	//sets the player_count field of teams[j] equal to k , which shows the "exact" number of players on each team
+	Teams[j].player_count = k;
 	fclose(fh);
 }
