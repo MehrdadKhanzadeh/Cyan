@@ -99,13 +99,13 @@ void matchSim(Team team1,Team team2,char date)
 		team2_score_chance = 0;
 	for(i = 1 ; i <= 90 ; i++)	
 	{
-		r = rand() % 1000; // remember to put srand(time()); in main fucntion
+		r = rand() % 1000; // remember to put srand(time()); in main function
 		if ((team1_score_chance * 2 + 5) > (float) r)
 		{
 			team1_goal_counter++ ;
 			//save the goal minute
 		}
-		r = rand() % 1000; // remember to put srand(time()); in main fucntion
+		r = rand() % 1000; // remember to put srand(time()); in main function
 		if ((team2_score_chance * 2 + 5) > (float) r)
 		{
 			team2_goal_counter++ ;
