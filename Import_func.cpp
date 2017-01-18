@@ -39,7 +39,10 @@ int main()
 
 void Import_team(char* team_name)
 {
-	FILE* fh = fopen(strcat(strcat("Teams\\", team_name) , ".csv"), "r");
+	char path[100];
+ 	strcpy(path, "Teams/");
+ 	strcat(strcat(path, team_name), ".csv");
+  	FILE* fh = fopen(path, "r");
 	int j;
 	if (strcmp(team_name, "Esteghlal") == 0)
 	{
