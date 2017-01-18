@@ -4,6 +4,7 @@
 #include <limits.h>
 
 int arrow_counter = 0;
+int user_team_number = 0;
 
 void init();
 void start();
@@ -14,6 +15,7 @@ void print(char *, int, int);
 void printSpace(int, int, int);
 int windowsWindowWidth();
 void arrow(int);
+void teamInput(char *);
 
 typedef struct Player
 {
@@ -37,11 +39,12 @@ typedef struct Team
     int mid;
     int attack;
     int form;
-    //Revision required	
-    Player players[11];
+
+    Player players[40];
 } Team;
 
 Team user;
+Team Teams[16];
 
 int main()
 {
@@ -343,6 +346,7 @@ void lineup()
         }
         }
         counter_temp = arrow_counter;
+        user.form = arrow_counter;
         int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
         if (isReturnPressed)
             break;
@@ -359,42 +363,35 @@ void lineup()
         print(" Ultimate Football Manager ", 2, 1);
         print("                           ", 2, 1);
         puts("");
-        switch (arrow_counter)
+        int i;
+        for (i = 0; i < 16; i++)
         {
-            case 0 :
-                print("                           ", 1, 1);
-                print("        4 - 4 - 2          ", 1, 1);
-                print("                           ", 1, 1);
-                print("                           ", 0, 1);
-                print("        5 - 4 - 1          ", 0, 1);
-                print("                           ", 0, 1);
-                print("                           ", 0, 1);
-                print("        4 - 3 - 3          ", 0, 1);
-                print("                           ", 0, 1);
-                break;
-            case 1 :
-                print("                           ", 0, 1);
-                print("        4 - 4 - 2          ", 0, 1);
-                print("                           ", 0, 1);
-                print("                           ", 1, 1);
-                print("        5 - 4 - 1          ", 1, 1);
-                print("                           ", 1, 1);
-                print("                           ", 0, 1);
-                print("        4 - 3 - 3          ", 0, 1);
-                print("                           ", 0, 1);
-                break;
-            case 2 :
-                print("                           ", 0, 1);
-                print("        4 - 4 - 2          ", 0, 1);
-                print("                           ", 0, 1);
-                print("                           ", 0, 1);
-                print("        5 - 4 - 1          ", 0, 1);
-                print("                           ", 0, 1);
-                print("                           ", 1, 1);
-                print("        4 - 3 - 3          ", 1, 1);
-                print("                           ", 1, 1);
-                break;
-        }
+            if (arrow_counter == i)
+            {
+                    //printSpace((27 - strlen(team[i])) / 2, 1, 1);
+                    print(Teams[user_team_number].players[i].name, 1, 1);
+                    print(Teams[user_team_number].players[i].age, 1, 1);
+                    print(Teams[user_team_number].players[i].number, 1, 1);
+                    print(Teams[user_team_number].players[i].skill, 1, 1);
+                    print(Teams[user_team_number].players[i].form, 1, 1);
+                    print(Teams[user_team_number].players[i].fitness, 1, 1);
+                    print(Teams[user_team_number].players[i].post, 1, 1);
+                    print(Teams[user_team_number].players[i].original_post, 1, 1);
+                    //printSpace(27 - (27 - strlen(team[i])) / 2, 1, 1);
+            }
+            else
+            {
+                //printSpace((27 - strlen(team[i])) / 2, 1, 0);
+                	print(Teams[user_team_number].players[i].name, 0, 1);
+                    print(Teams[user_team_number].players[i].age, 0, 1);
+                    print(Teams[user_team_number].players[i].number, 0, 1);
+                    print(Teams[user_team_number].players[i].skill, 0, 1);
+                    print(Teams[user_team_number].players[i].form, 0, 1);
+                    print(Teams[user_team_number].players[i].fitness, 0, 1);
+                    print(Teams[user_team_number].players[i].post, 0, 1);
+                    print(Teams[user_team_number].players[i].original_post, 0, 1);
+                //printSpace(27 - (27 - strlen(team[i])) / 2, 1, 0);
+            }
         }
         counter_temp = arrow_counter;
         user.form = arrow_counter;
@@ -508,4 +505,107 @@ void arrow(int page_items)
     else if ( GetAsyncKeyState ( VK_RIGHT ) & SHRT_MAX )
       puts ( "Right arrow is pressed" );
 	*/
+}
+
+void importTeam(char* team_name)
+{
+	FILE* fh = fopen(strcat(strcat("Teams\\", team_name) , ".csv"), "r");
+	int j;
+	if (strcmp(team_name, "Esteghlal") == 0)
+	{
+		j = 0;
+	}
+	else if (strcmp(team_name, "EsteghlalKhuzestan") == 0)
+	{
+		j = 1;
+	}
+	else if (strcmp(team_name, "FooladKhuzestan") == 0)
+	{
+		j = 2;
+	}
+	else if (strcmp(team_name, "GostareshFoolad") == 0)
+	{
+		j = 3;
+	}
+	else if (strcmp(team_name, "MachineSazi") == 0)
+	{
+		j = 4;
+	}
+	else if (strcmp(team_name, "NaftTehran") == 0)
+	{
+		j = 5;
+	}
+	else if (strcmp(team_name, "PadidehKhorasan") == 0)
+	{
+		j = 6;
+	}
+	else if (strcmp(team_name, "Paykan") == 0)
+	{
+		j = 7;
+	}
+	else if (strcmp(team_name, "Persepolis") == 0)
+	{
+		j = 8;
+	}
+	else if (strcmp(team_name, "SabaQom") == 0)
+	{
+		j = 9;
+	}
+	else if (strcmp(team_name, "Saipa") == 0)
+	{
+		j = 10;
+	}
+	else if (strcmp(team_name, "SanatNaft") == 0)
+	{
+		j = 11;
+	}
+	else if (strcmp(team_name, "Sepahan") == 0)
+	{
+		j = 12;
+	}
+	else if (strcmp(team_name, "SiahjameganMashhad") == 0)
+	{
+		j = 13;
+	}
+	else if (strcmp(team_name, "TractorSazi") == 0)
+	{
+		j = 14;
+	}
+	else if (strcmp(team_name, "ZobAhan") == 0)
+	{
+		j = 15;
+	}
+	else
+	{
+		printf("Invalid Name!");
+		exit(-1);
+	}
+	if (!fh) {
+		perror("Can't Open File: ");
+		exit(-1);
+	}
+	char tmp[200];
+	char * ptr;
+	int k = 0;
+	int i;
+	while (fgets(tmp, 200, fh) != NULL)
+	{
+		ptr = tmp;
+		sscanf(tmp, "%d,", &Teams[j].players[k].number);
+		for (i = 0; tmp[i] != ','; i++);
+		ptr += (i + 1);
+		char fullname[100];
+		for (i = 0; ptr[i] != ','; i++)
+		{
+			fullname[i] = ptr[i];
+		}
+		fullname[i] = '\0';
+		strcpy(Teams[j].players[k].name, fullname);
+		ptr += (i + 1);
+		sscanf(ptr, "%d,%c,%d,%d,%d", &Teams[j].players[k].age, &Teams[j].players[k].original_post, &Teams[j].players[k].skill, &Teams[j].players[k].form, &Teams[j].players[k].fitness);
+		k++;
+	}
+	user_team_number = j;
+	fclose(fh);
+}
 }
