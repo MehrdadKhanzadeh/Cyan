@@ -25,7 +25,7 @@ float teamAttack(Team current_team)
 			break;	
 	}
 }
-float teamDefenence(Team current_team)
+float teamDefence(Team current_team)
 {
 	float defence_overall ,mid_overall ,goalkeeper_overall;
 	goalkeeper_overall = 0.5 * current_team.fix_players[1].skill + 0.3 * current_team.fix_players[1].form + 0.2 * current_team.fix_players[1].fitness;
