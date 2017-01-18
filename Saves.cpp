@@ -20,9 +20,15 @@ void save(char* i)
 	}
 	else
 	{
-		save = fopen(strcat(strcat("Saves/Save", i), ".dat"), "w");
+		char path[100];
+		strcpy(path, "Saves/Save");
+		strcat(strcat(path, i), ".dat");
+		save = fopen(path , "w");
 		//fprintf : buncha stuff in some lines
-		encode(strcat(strcat("Save", i), ".dat"));
+		char tmp_encode[100];
+		strcpy(tmp_encode, "Save");
+		strcat(strcat(tmp_encode, i), ".dat");
+		encode(tmp_encode);
 	}
 	fclose(save);
 }
@@ -65,7 +71,10 @@ void autosave()
 
 void encode(char* file_name)
 {
-	FILE* fh = fopen(strcat("Saves/", file_name), "r+");
+	char path[100];
+	strcpy(path, "Saves/");
+	strcat(path, file_name);
+	FILE* fh = fopen(path, "r+");
 	char tmp[100];
 	while (fgets(tmp, 100, fh) != NULL)
 	{
@@ -80,7 +89,10 @@ void encode(char* file_name)
 
 void decode(char* file_name)
 {
-	FILE* fh = fopen(strcat("Saves/", file_name), "r+");
+	char path[100];
+	strcpy(path, "Saves/");
+	strcat(path, file_name);
+	FILE* fh = fopen(path , "r+");
 	char tmp[100];
 	while (fgets(tmp , 100 , fh)!= NULL)
 	{
