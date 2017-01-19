@@ -1,3 +1,5 @@
+//ITNOG
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -12,7 +14,6 @@ void teamLists();
 void game();
 void lineup();
 void print(char *, int, int);
-void printSpace(int, int, int);
 int windowsWindowWidth();
 void arrow(int);
 void importTeam(char *);
@@ -42,6 +43,7 @@ typedef struct Team
 
     int player_count;
     Player players[40];
+    int is_player_selected[40];
     Player fix_players[11];
 } Team;
 
@@ -277,9 +279,9 @@ void teamLists()
                 print(" Ultimate Football Manager ", 2, 1);
                 print("                           ", 2, 1);
                 puts("");
-                print("                           ", 2, 1);
-                print("      Select Your Team     ", 2, 1);
-                print("                           ", 2, 1);
+                print("                           ", 2, 0);
+                print("      Select Your Team     ", 2, 0);
+                print("                           ", 2, 0);
                 puts("");
                 for (i = 0; i < 16; i++)
                 {
@@ -313,6 +315,8 @@ void teamLists()
                 if (strcmp(user.name, Teams[j].name) == 0)
                     team_number = j;
             }
+            for (j = 0; j < 40; j++)
+                user.is_player_selected[j] = 0;
             int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
             if (isReturnPressed)
                 break;
@@ -377,9 +381,11 @@ void lineup()
         if (isReturnPressed)
             break;
     }
+    int j;
+    for (j = 0; j < 11; j++){
     arrow_counter = 0;
     counter_temp = 1;
-    int i;
+    int i, counter = 0;
     while (TRUE)
     {
         arrow(Teams[team_number].player_count);
@@ -390,6 +396,10 @@ void lineup()
         print(" Ultimate Football Manager ", 2, 1);
         print("                           ", 2, 1);
         puts("");
+        print("                           ", 2, 0);
+        print("    Select Your Players    ", 2, 0);
+        print("                           ", 2, 0);
+        puts("");
         for (i = 0; i < Teams[team_number].player_count; i++)
         {
             /*int j, k;
@@ -399,10 +409,10 @@ void lineup()
                 for (k = 0; k < windowsWindowWidth(); k++)
                     printf("\b");
             }*/
+            if (user.is_player_selected[i] == 0){
             if (arrow_counter == i)
             {
                 char str[100];
-                //printSpace((27 - strlen(team[i])) / 2, 1, 1);
                 print("Name:", 1, 0);
                 sprintf(str, "%s", Teams[team_number].players[i].name);
                 print(str, 1, 0);
@@ -421,22 +431,40 @@ void lineup()
                 print("Form:", 1, 0);
                 sprintf(str, "%d", Teams[team_number].players[i].form);
                 print(str, 1, 0);
-                //printSpace(27 - (27 - strlen(team[i])) / 2, 1, 1);
             }
             else
             {
-                //printSpace((27 - strlen(team[i])) / 2, 1, 0);
                 print(Teams[team_number].players[i].name, 0, 0);
-                //printSpace(27 - (27 - strlen(team[i])) / 2, 1, 0);
+            }}
+            else
+            if (arrow_counter == i)
+            {
+                print(Teams[team_number].players[i].name, 1, 0);
+            }
+            else
+            {
+                print(Teams[team_number].players[i].name, 2, 0);
             }
         }
         }
         counter_temp = arrow_counter;
+        //int isSpacePressed = GetAsyncKeyState(VK_SPACE) & 0x8000;
         int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
-        if (isReturnPressed)
+        if (isReturnPressed && user.is_player_selected[arrow_counter] == 0)
+        {
+            user.players[j].age = Teams[team_number].players[i].age;
+            user.players[j].fitness = Teams[team_number].players[i].fitness;
+            user.players[j].form = Teams[team_number].players[i].form;
+            strcpy(user.players[j].name, Teams[team_number].players[i].name);
+            user.players[j].number = Teams[team_number].players[i].number;
+            user.players[j].original_post = Teams[team_number].players[i].original_post;
+            user.players[j].post = Teams[team_number].players[i].post;
+            user.players[j].skill = Teams[team_number].players[i].skill;
+            user.is_player_selected[arrow_counter] = 1;
             break;
+        }
     }
-
+    }
 }
 
 int windowsWindowWidth(int type)
@@ -490,42 +518,6 @@ void print(char *s, int clr, int align)
         for (i = 0; i < 27 - strlen(s); i++)
             printf(" ");
     puts("");
-    SetConsoleTextAttribute(hConsole, saved_attributes);
-    return;
-}
-
-void printSpace(int n, int clr, int align)
-{
-    const int total_width = windowsWindowWidth(1);
-    const int field_width = (total_width - 27) / 2;
-
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-    WORD saved_attributes;
-    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
-    saved_attributes = consoleInfo.wAttributes;
-
-    int i;
-    if (align)
-    {
-        for (i = 0; i < field_width; i++)
-            printf(" ");
-    }
-    switch (clr)
-    {
-        case 0 :
-            SetConsoleTextAttribute(hConsole, BACKGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY | FOREGROUND_GREEN);
-            break;
-        case 1 :
-            SetConsoleTextAttribute(hConsole, BACKGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
-            break;
-        case 2 :
-            SetConsoleTextAttribute(hConsole, BACKGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_INTENSITY / 3| FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
-            break;
-    }
-
-    for (i = 0; i < n; i++)
-        printf(" ");
     SetConsoleTextAttribute(hConsole, saved_attributes);
     return;
 }
