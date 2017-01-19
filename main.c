@@ -330,7 +330,7 @@ void lineup()
     int counter_temp = 1;
     while (TRUE)
     {
-        arrow(3);
+        arrow(4);
         if(counter_temp != arrow_counter){
         system("cls");
         puts("");
@@ -345,10 +345,13 @@ void lineup()
                 print("        4 - 4 - 2          ", 1, 1);
                 print("                           ", 1, 1);
                 print("                           ", 0, 1);
+                print("        4 - 3 - 3          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
                 print("        5 - 4 - 1          ", 0, 1);
                 print("                           ", 0, 1);
                 print("                           ", 0, 1);
-                print("        4 - 3 - 3          ", 0, 1);
+                print("        3 - 5 - 2          ", 0, 1);
                 print("                           ", 0, 1);
                 break;
             case 1 :
@@ -356,10 +359,13 @@ void lineup()
                 print("        4 - 4 - 2          ", 0, 1);
                 print("                           ", 0, 1);
                 print("                           ", 1, 1);
-                print("        5 - 4 - 1          ", 1, 1);
+                print("        4 - 3 - 3          ", 1, 1);
                 print("                           ", 1, 1);
                 print("                           ", 0, 1);
-                print("        4 - 3 - 3          ", 0, 1);
+                print("        5 - 4 - 1          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        3 - 5 - 2          ", 0, 1);
                 print("                           ", 0, 1);
                 break;
             case 2 :
@@ -367,10 +373,27 @@ void lineup()
                 print("        4 - 4 - 2          ", 0, 1);
                 print("                           ", 0, 1);
                 print("                           ", 0, 1);
+                print("        4 - 3 - 3          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        5 - 4 - 1          ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        3 - 5 - 2          ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 3 :
+                print("                           ", 0, 1);
+                print("        4 - 4 - 2          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        4 - 3 - 3          ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
                 print("        5 - 4 - 1          ", 0, 1);
                 print("                           ", 0, 1);
                 print("                           ", 1, 1);
-                print("        4 - 3 - 3          ", 1, 1);
+                print("        3 - 5 - 2          ", 1, 1);
                 print("                           ", 1, 1);
                 break;
         }
@@ -382,8 +405,8 @@ void lineup()
             break;
     }
     int j;
-    for (j = 0; j < 11; j++){
     arrow_counter = 0;
+    for (j = 0; j < 11; j++){
     counter_temp = 1;
     int i, counter = 0;
     while (TRUE)
@@ -465,6 +488,7 @@ void lineup()
         }
     }
     }
+    game();
 }
 
 int windowsWindowWidth(int type)
