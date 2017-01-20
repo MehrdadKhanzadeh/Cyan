@@ -17,12 +17,14 @@ void game();
 void lineup();
 void saveUI();
 void loadUI();
+void table();
 void print(char *, int, int);
 int windowsWindowWidth();
 void arrow(int);
 void importTeam(char *);
 void teamSort(int);
 void leagueImport();
+void tableSort();
 
 typedef struct Player
 {
@@ -53,7 +55,7 @@ typedef struct Team
     int lose;
     int draw;
 
-    int point;
+    int points;
 
     int player_count;
     Player players[50];
@@ -63,6 +65,7 @@ typedef struct Team
 
 Team user;
 Team teams[16];
+Team sorted_teams[16];
 int home[128];
 int away[128];
 
@@ -167,7 +170,7 @@ void start()
 
 void game()
 {
-    //autosave();
+    autosave();
     arrow_counter = 0;
     int counter_temp = 1;
     while (TRUE)
@@ -278,6 +281,9 @@ void game()
     {
         case 0 :
             lineup();
+            break;
+        case 2 :
+            table();
             break;
         case 3 :
             saveUI();
@@ -606,6 +612,7 @@ void saveUI()
             save("3");
             break;
     }
+    game();
 }
 
 void loadUI()
@@ -702,6 +709,62 @@ void loadUI()
             load("3");
             break;
     }
+}
+
+void table()
+{
+    tableSort();
+    arrow_counter = 0;
+    int counter_temp = 1;
+    while (TRUE)
+    {
+        arrow(16);
+        if(counter_temp != arrow_counter){
+        system("cls");
+        puts("");
+        print("                           ", 2, 1);
+        print("   Ultimate Team Manager   ", 2, 1);
+        print("                           ", 2, 1);
+        puts("");
+        int i;
+        for (i = 0; i < 16; i++)
+        {
+            if (arrow_counter == i){
+            char str[100];
+            print("Name:", 1, 0);
+            sprintf(str, "%s", teams[i].name);
+            print(str, 1, 0);
+            print("Points:", 1, 0);
+            sprintf(str, "%d", teams[i].points);
+            print(str, 1, 0);
+            print("Wins:", 1, 0);
+            sprintf(str, "%d", teams[i].win);
+            print(str, 1, 0);
+            print("Draw:", 1, 0);
+            sprintf(str, "%d", teams[i].draw);
+            print(str, 1, 0);
+            print("Lose:", 1, 0);
+            sprintf(str, "%d", teams[i].lose);
+            print(str, 1, 0);
+            print("Goals For:", 1, 0);
+            sprintf(str, "%d", teams[i].goals_for);
+            print(str, 1, 0);
+            print("Goals Against:", 1, 0);
+            sprintf(str, "%d", teams[i].goals_against);
+            print(str, 1, 0);
+            print("Goal Difference:", 1, 0);
+            sprintf(str, "%d", teams[i].goals_for - teams[i].goals_against);
+            print(str, 1, 0);}
+            else
+                print(teams[i].name, 0, 0);
+        }
+        }
+        counter_temp = arrow_counter;
+        int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
+        if (isReturnPressed)
+            break;
+    }
+    game();
 }
 
 int windowsWindowWidth(int type)
@@ -894,7 +957,7 @@ void save(char* n)
 		for (i = 0; i < 16; i++)
 		{
 			fprintf(save, "%s\n", teams[i].name);
-			fprintf(save, "%d,%d,%d,%d,%d,%d,%d,%d\n", teams[i].formation, teams[i].goals_for, teams[i].goals_against, teams[i].win, teams[i].lose, teams[i].draw, teams[i].point, teams[i].player_count);
+			fprintf(save, "%d,%d,%d,%d,%d,%d,%d,%d\n", teams[i].formation, teams[i].goals_for, teams[i].goals_against, teams[i].win, teams[i].lose, teams[i].draw, teams[i].points, teams[i].player_count);
 			for (j = 0; j < teams[i].player_count; j++)
 			{
 				fprintf(save, "%s\n", teams[i].players[j].name);
@@ -905,7 +968,7 @@ void save(char* n)
 			for (k = 0; k < 11; k++)
 			{
 				fprintf(save, "%s\n", teams[i].fix_players[k].name);
-				fprintf(save, "%d,%d,%d,%d,%d,%c,%c", teams[i].fix_players[k].age, teams[i].fix_players[k].number, teams[i].fix_players[k].base_skill, teams[i].fix_players[k].form, teams[i].fix_players[k].fitness, teams[i].fix_players[k].original_post, teams[i].fix_players[k].post);
+				fprintf(save, "%d,%d,%d,%d,%d,%c,%c\n", teams[i].fix_players[k].age, teams[i].fix_players[k].number, teams[i].fix_players[k].base_skill, teams[i].fix_players[k].form, teams[i].fix_players[k].fitness, teams[i].fix_players[k].original_post, teams[i].fix_players[k].post);
 			}
 			fprintf(save, "\n");
 		}
@@ -923,7 +986,7 @@ void save(char* n)
 		for (i = 0; i < 16; i++)
 		{
 			fprintf(save, "%s\n", teams[i].name);
-			fprintf(save, "%d,%d,%d,%d,%d,%d,%d,%d\n", teams[i].formation, teams[i].goals_for, teams[i].goals_against, teams[i].win, teams[i].lose, teams[i].draw, teams[i].point, teams[i].player_count);
+			fprintf(save, "%d,%d,%d,%d,%d,%d,%d,%d\n", teams[i].formation, teams[i].goals_for, teams[i].goals_against, teams[i].win, teams[i].lose, teams[i].draw, teams[i].points, teams[i].player_count);
 			int j;
 			for (j = 0; j < teams[i].player_count; j++)
 			{
@@ -941,7 +1004,7 @@ void save(char* n)
 		strcpy(tmp_encode, "Save");
 		strcat(tmp_encode, n);
 		strcat(tmp_encode, ".dat");
-		//encode(tmp_encode);
+		encode(tmp_encode);
 	}
 	fclose(save);
 }
@@ -985,14 +1048,14 @@ void load(char* n)
 	{
 		fgets(buffer, 100, load);
 		strcpy(teams[i].name, buffer);
-		teams[i].name[strlen(teams[i].name)] = '\0';
+		teams[i].name[strlen(teams[i].name) - 1] = '\0';
 		fgets(buffer, 100, load);
-		sscanf(buffer, "%d,%d,%d,%d,%d,%d,%d,%d", &teams[i].formation, &teams[i].goals_for, &teams[i].goals_against, &teams[i].win, &teams[i].lose, &teams[i].draw, &teams[i].point, &teams[i].player_count);
+		sscanf(buffer, "%d,%d,%d,%d,%d,%d,%d,%d", &teams[i].formation, &teams[i].goals_for, &teams[i].goals_against, &teams[i].win, &teams[i].lose, &teams[i].draw, &teams[i].points, &teams[i].player_count);
 		for (j = 0; j < teams[i].player_count; j++)
 		{
 			fgets(buffer, 100, load);
 			strcpy(teams[i].players[j].name, buffer);
-            teams[i].players[j].name[strlen(teams[i].players[j].name)] = '\0';
+            teams[i].players[j].name[strlen(teams[i].players[j].name) - 1] = '\0';
 			fgets(buffer, 100, load);
 			sscanf(buffer, "%d,%d,%d,%d,%d,%c,%c", &teams[i].players[j].age, &teams[i].players[j].number, &teams[i].players[j].base_skill, &teams[i].players[j].form, &teams[i].players[j].fitness, &teams[i].players[j].original_post, &teams[i].players[j].post);
 			fgets(buffer, 100, load);
@@ -1002,7 +1065,7 @@ void load(char* n)
 		{
 			fgets(buffer, 100, load);
 			strcpy(teams[i].fix_players[j].name, buffer);
-            teams[i].fix_players[j].name[strlen(teams[i].fix_players[j].name)] = '\0';
+            teams[i].fix_players[j].name[strlen(teams[i].fix_players[j].name)- 1] = '\0';
 			fgets(buffer, 100, load);
 			sscanf(buffer, "%d,%d,%d,%d,%d,%c,%c", &teams[i].fix_players[j].age, &teams[i].fix_players[j].number, &teams[i].fix_players[j].base_skill, &teams[i].fix_players[j].form, &teams[i].fix_players[j].fitness, &teams[i].fix_players[j].original_post, &teams[i].fix_players[j].post);
 		}
@@ -1426,4 +1489,86 @@ void leagueImport()
 		i++;
 	}
 	fclose(fh);
+}
+
+void tableSort()
+{
+	int i,j,int_temp;
+	char name_temp[100];
+	for (i = 0 ; i < 16 ; i++)
+	{
+		strcpy(sorted_teams[i].name, teams[i].name);
+		sorted_teams[i].win = teams[i].win;
+		sorted_teams[i].draw = teams[i].draw;
+		sorted_teams[i].lose = teams[i].lose;
+		sorted_teams[i].goals_for = teams[i].goals_against;
+		sorted_teams[i].goals_against = teams[i].goals_against;
+		sorted_teams[i].points = teams[i].points;
+	}
+	for (i = 0 ; i < 16 ; i++)
+	{
+		for (j = i + 1 ; j < 16 ; j++)
+		{
+			if(sorted_teams[i].points < sorted_teams[j].points)
+			{
+					strcpy(name_temp, sorted_teams[i].name);
+					strcpy(sorted_teams[i].name, sorted_teams[j].name);
+					strcpy(sorted_teams[j].name, name_temp);
+
+					int_temp = sorted_teams[i].win;
+					sorted_teams[i].win = sorted_teams[j].win;
+					sorted_teams[j].win = int_temp;
+
+					int_temp = sorted_teams[i].draw;
+					sorted_teams[i].draw = sorted_teams[j].draw;
+					sorted_teams[j].draw = int_temp;
+
+					int_temp = sorted_teams[i].lose;
+					sorted_teams[i].lose = sorted_teams[j].lose;
+					sorted_teams[j].lose = int_temp;
+
+					int_temp = sorted_teams[i].goals_for;
+					sorted_teams[i].goals_for = sorted_teams[j].goals_for;
+					sorted_teams[j].goals_for = int_temp;
+
+					int_temp = sorted_teams[i].goals_against;
+					sorted_teams[i].goals_against = sorted_teams[j].goals_against;
+					sorted_teams[j].goals_against = int_temp;
+
+					int_temp = sorted_teams[i].points;
+					sorted_teams[i].points = sorted_teams[j].points;
+					sorted_teams[j].points = int_temp;
+			}
+			if(sorted_teams[i].points == sorted_teams[j].points && ((sorted_teams[i].goals_for - sorted_teams[i].goals_against) < (sorted_teams[j].goals_for - sorted_teams[j].goals_against)))
+			{
+                    strcpy(name_temp, sorted_teams[i].name);
+					strcpy(sorted_teams[i].name, sorted_teams[j].name);
+					strcpy(sorted_teams[j].name, name_temp);
+
+					int_temp = sorted_teams[i].win;
+					sorted_teams[i].win = sorted_teams[j].win;
+					sorted_teams[j].win = int_temp;
+
+					int_temp = sorted_teams[i].draw;
+					sorted_teams[i].draw = sorted_teams[j].draw;
+					sorted_teams[j].draw = int_temp;
+
+					int_temp = sorted_teams[i].lose;
+					sorted_teams[i].lose = sorted_teams[j].lose;
+					sorted_teams[j].lose = int_temp;
+
+					int_temp = sorted_teams[i].goals_for;
+					sorted_teams[i].goals_for = sorted_teams[j].goals_for;
+					sorted_teams[j].goals_for = int_temp;
+
+					int_temp = sorted_teams[i].goals_against;
+					sorted_teams[i].goals_against = sorted_teams[j].goals_against;
+					sorted_teams[j].goals_against = int_temp;
+
+					int_temp = sorted_teams[i].points;
+					sorted_teams[i].points = sorted_teams[j].points;
+					sorted_teams[j].points = int_temp;
+			}
+		}
+	}
 }
