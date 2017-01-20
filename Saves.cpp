@@ -146,12 +146,14 @@ void load(char* i)
 	{
 		fgets(buffer, 100, load);
 		strcpy(teams[i].name, buffer);
+		teams[i].name[strlen(teams[i].name)] = '\0';
 		fgets(buffer, 100, load);
 		sscanf(buffer, "%d,%d,%d,%d,%d,%d,%d,%d", &teams[i].formation, &teams[i].goals_for, &teams[i].goals_against, &teams[i].win, &teams[i].lose, &teams[i].draw, &teams[i].point, &teams[i].player_count);
 		for (int j = 0; j < teams[i].player_count; j++)
 		{
 			fgets(buffer, 100, load);
 			strcpy(teams[i].players[j].name , buffer);
+			teams[i].players[j].name[strlen(teams[i].players[j].name)] = '\0';
 			fgets(buffer, 100, load);
 			sscanf(buffer, "%d,%d,%d,%d,%d,%c,%c", &teams[i].players[j].age, &teams[i].players[j].number, &teams[i].players[j].base_skill, &teams[i].players[j].form, &teams[i].players[j].fitness, &teams[i].players[j].original_post, &teams[i].players[j].post);
 			fgets(buffer, 100, load);
@@ -161,6 +163,7 @@ void load(char* i)
 		{
 			fgets(buffer, 100, load);
 			strcpy(teams[i].fix_players[j].name, buffer);
+			teams[i].fix_players[j].name[strlen(teams[i].fix_players[j].name] = '\0';
 			fgets(buffer, 100, load);
 			sscanf(buffer, "%d,%d,%d,%d,%d,%c,%c", &teams[i].fix_players[j].age, &teams[i].fix_players[j].number, &teams[i].fix_players[j].base_skill, &teams[i].fix_players[j].form, &teams[i].fix_players[j].fitness, &teams[i].fix_players[j].original_post, &teams[i].fix_players[j].post);
 		}
@@ -188,6 +191,7 @@ void encode(char* file_name)
 			tmp[i] += 10;
 		}
 		fprintf(fh, "%s", tmp);
+		fseek(fh, 0, SEEK_END);
 	}
 	fclose(fh);
 }
@@ -206,6 +210,7 @@ void decode(char* file_name)
 			tmp[i] -= 10;
 		}
 		fprintf(fh, "%s", tmp);
+		fseek(fh, 0, SEEK_END);
 	}
 	fclose(fh);
 }
