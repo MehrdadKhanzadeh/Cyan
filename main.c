@@ -7,16 +7,22 @@
 
 int arrow_counter = 0;
 int team_number = 0;
+int random = 0;
+int week = 0;
 
 void init();
 void start();
 void teamLists();
 void game();
 void lineup();
+void saveUI();
+void loadUI();
 void print(char *, int, int);
 int windowsWindowWidth();
 void arrow(int);
 void importTeam(char *);
+void teamSort(int);
+void leagueImport();
 
 typedef struct Player
 {
@@ -24,9 +30,11 @@ typedef struct Player
     int age;
     int number;
 
+    int base_skill;
     int skill;
     int form;
     int fitness;
+
 
     char original_post;
     char post;
@@ -36,19 +44,27 @@ typedef struct Team
 {
     char name[100];
 
-    int defence;
-    int mid;
-    int attack;
     int formation;
 
+    int goals_for;
+    int goals_against;
+
+    int win;
+    int lose;
+    int draw;
+
+    int point;
+
     int player_count;
-    Player players[40];
-    int is_player_selected[40];
+    Player players[50];
+    int is_player_selected[50];
     Player fix_players[11];
 } Team;
 
 Team user;
-Team Teams[16];
+Team teams[16];
+int home[128];
+int away[128];
 
 int main()
 {
@@ -120,27 +136,38 @@ void start()
         if (isReturnPressed)
             break;
     }
-    importTeam("Esteghlal");
-    importTeam("EsteghlalKhuzestan");
-    importTeam("FooladKhuzestan");
-    importTeam("GostareshFoolad");
-    importTeam("MachineSazi");
-    importTeam("NaftTehran");
-    importTeam("PadidehKhorasan");
-    importTeam("Paykan");
-    importTeam("Persepolis");
-    importTeam("SabaQom");
-    importTeam("Saipa");
-    importTeam("SanatNaft");
-    importTeam("Sepahan");
-    importTeam("SiahjameganMashhad");
-    importTeam("TractorSazi");
-    importTeam("ZobAhan");
+    if (arrow_counter == 0)
+    {
+        importTeam("Esteghlal");
+        importTeam("EsteghlalKhuzestan");
+        importTeam("FooladKhuzestan");
+        importTeam("GostareshFoolad");
+        importTeam("MachineSazi");
+        importTeam("NaftTehran");
+        importTeam("PadidehKhorasan");
+        importTeam("Paykan");
+        importTeam("Persepolis");
+        importTeam("SabaQom");
+        importTeam("Saipa");
+        importTeam("SanatNaft");
+        importTeam("Sepahan");
+        importTeam("SiahjameganMashhad");
+        importTeam("TractorSazi");
+        importTeam("ZobAhan");
+        int j;
+        for (j = 0; j < 16; j++)
+        {
+            teams[j].formation = 0;
+            teamSort(j);
+        }
+    }
+    else
+        loadUI();
 }
 
 void game()
 {
-    //printf("%s", team_name);
+    //autosave();
     arrow_counter = 0;
     int counter_temp = 1;
     while (TRUE)
@@ -252,12 +279,15 @@ void game()
         case 0 :
             lineup();
             break;
+        case 3 :
+            saveUI();
+            break;
     }
 }
 
 void teamLists()
 {
-    FILE *f = fopen("Teams/teams.csv", "r");
+    FILE *f = fopen("teams/teams.csv", "r");
     char team[16][30];
     int i, j;
     for (i = 0; i < 16; i++)
@@ -307,16 +337,17 @@ void teamLists()
                 }
             }
             strcpy(user.name, team[arrow_counter]);
+            user.player_count = teams[team_number].player_count;
             //printf("%s", user.name);
             counter_temp = arrow_counter;
             int j;
             for (j = 0; j < 16; j++)
             {
-                if (strcmp(user.name, Teams[j].name) == 0)
+                if (strcmp(user.name, teams[j].name) == 0)
                     team_number = j;
             }
             for (j = 0; j < 40; j++)
-                user.is_player_selected[j] = 0;
+                teams[team_number].is_player_selected[j] = 0;
             int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
             if (isReturnPressed)
                 break;
@@ -326,6 +357,7 @@ void teamLists()
 
 void lineup()
 {
+    int j;
     arrow_counter = 0;
     int counter_temp = 1;
     while (TRUE)
@@ -400,18 +432,22 @@ void lineup()
         }
         counter_temp = arrow_counter;
         user.formation = arrow_counter;
+        teams[team_number].formation = arrow_counter;
         int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
         if (isReturnPressed)
             break;
     }
-    int j;
+    int k;
+    for (k = 0; k < teams[team_number].player_count; k++)
+            teams[team_number].is_player_selected[k] = 0;
     arrow_counter = 0;
     for (j = 0; j < 11; j++){
     counter_temp = 1;
     int i, counter = 0;
     while (TRUE)
     {
-        arrow(Teams[team_number].player_count);
+        int k;
+        arrow(teams[team_number].player_count);
         if(counter_temp != arrow_counter){
         system("cls");
         puts("");
@@ -423,7 +459,7 @@ void lineup()
         print("    Select Your Players    ", 2, 0);
         print("                           ", 2, 0);
         puts("");
-        for (i = 0; i < Teams[team_number].player_count; i++)
+        for (i = 0; i < teams[team_number].player_count; i++)
         {
             /*int j, k;
             for (j = 0; j < (27 - strlen(team[i])) / 2; j++)
@@ -432,63 +468,240 @@ void lineup()
                 for (k = 0; k < windowsWindowWidth(); k++)
                     printf("\b");
             }*/
-            if (user.is_player_selected[i] == 0){
+            if (teams[team_number].is_player_selected[i] == 0){
             if (arrow_counter == i)
             {
                 char str[100];
                 print("Name:", 1, 0);
-                sprintf(str, "%s", Teams[team_number].players[i].name);
+                sprintf(str, "%s", teams[team_number].players[i].name);
                 print(str, 1, 0);
                 print("Number:", 1, 0);
-                sprintf(str, "%d", Teams[team_number].players[i].number);
+                sprintf(str, "%d", teams[team_number].players[i].number);
                 print(str, 1, 0);
                 print("Age:", 1, 0);
-                sprintf(str, "%d", Teams[team_number].players[i].age);
+                sprintf(str, "%d", teams[team_number].players[i].age);
                 print(str, 1, 0);
                 print("Skill:", 1, 0);
-                sprintf(str, "%d", Teams[team_number].players[i].skill);
+                sprintf(str, "%d", teams[team_number].players[i].base_skill);
                 print(str, 1, 0);
                 print("Fitness:", 1, 0);
-                sprintf(str, "%d", Teams[team_number].players[i].fitness);
+                sprintf(str, "%d", teams[team_number].players[i].fitness);
                 print(str, 1, 0);
                 print("Form:", 1, 0);
-                sprintf(str, "%d", Teams[team_number].players[i].form);
+                sprintf(str, "%d", teams[team_number].players[i].form);
+                print(str, 1, 0);
+                print("Post:", 1, 0);
+                sprintf(str, "%c", teams[team_number].players[i].original_post);
                 print(str, 1, 0);
             }
             else
             {
-                print(Teams[team_number].players[i].name, 0, 0);
+                print(teams[team_number].players[i].name, 0, 0);
             }}
             else
             if (arrow_counter == i)
             {
-                print(Teams[team_number].players[i].name, 1, 0);
+                //char str[100];
+                print(teams[team_number].players[i].name, 1, 0);
+                //print("Post:", 1, 0);
+                //sprintf(str, "%c", teams[team_number].players[i].post);
+                //print(str, 1, 0);
             }
             else
             {
-                print(Teams[team_number].players[i].name, 2, 0);
+                //char str[100];
+                print(teams[team_number].players[i].name, 2, 0);
+                //print("Post That You Selected For This Player:", 2, 0);
+                //sprintf(str, "%c", teams[team_number].players[i].post);
+                //print(str, 1, 0);
             }
         }
         }
         counter_temp = arrow_counter;
         //int isSpacePressed = GetAsyncKeyState(VK_SPACE) & 0x8000;
         int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
-        if (isReturnPressed && user.is_player_selected[arrow_counter] == 0)
+        if (isReturnPressed && teams[team_number].is_player_selected[arrow_counter] == 0)
         {
-            user.players[j].age = Teams[team_number].players[i].age;
-            user.players[j].fitness = Teams[team_number].players[i].fitness;
-            user.players[j].form = Teams[team_number].players[i].form;
-            strcpy(user.players[j].name, Teams[team_number].players[i].name);
-            user.players[j].number = Teams[team_number].players[i].number;
-            user.players[j].original_post = Teams[team_number].players[i].original_post;
-            user.players[j].post = Teams[team_number].players[i].post;
-            user.players[j].skill = Teams[team_number].players[i].skill;
-            user.is_player_selected[arrow_counter] = 1;
+            teams[team_number].fix_players[j].age = teams[team_number].players[arrow_counter].age;
+            teams[team_number].fix_players[j].fitness = teams[team_number].players[arrow_counter].fitness;
+            teams[team_number].fix_players[j].form = teams[team_number].players[arrow_counter].form;
+            strcpy(teams[team_number].fix_players[j].name, teams[team_number].players[arrow_counter].name);
+            teams[team_number].fix_players[j].number = teams[team_number].players[arrow_counter].number;
+            teams[team_number].fix_players[j].original_post = teams[team_number].players[arrow_counter].original_post;
+            teams[team_number].fix_players[j].post = teams[team_number].players[arrow_counter].post;
+            teams[team_number].fix_players[j].base_skill = teams[team_number].players[arrow_counter].base_skill;
+            teams[team_number].is_player_selected[arrow_counter] = 1;
             break;
         }
     }
     }
     game();
+}
+
+void saveUI()
+{
+    arrow_counter = 0;
+    int counter_temp = 1;
+    while (TRUE)
+    {
+        arrow(3);
+        if(counter_temp != arrow_counter){
+        system("cls");
+        puts("");
+        print("                           ", 2, 1);
+        print("   Ultimate Team Manager   ", 2, 1);
+        print("                           ", 2, 1);
+        puts("");
+        switch (arrow_counter)
+        {
+            case 0 :
+                print("                           ", 1, 1);
+                print("        Save Slot 1        ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        Save Slot 2        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        Save Slot 3        ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 1 :
+                print("                           ", 0, 1);
+                print("        Save Slot 1        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        Save Slot 2        ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        Save Slot 3        ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 2 :
+                print("                           ", 0, 1);
+                print("        Save Slot 1        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        Save Slot 2        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        Save Slot 3        ", 1, 1);
+                print("                           ", 1, 1);
+                break;
+            }
+        }
+        counter_temp = arrow_counter;
+        int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
+        if (isReturnPressed)
+            break;
+    }
+    switch (arrow_counter)
+    {
+        case 0 :
+            save("1");
+            break;
+        case 1 :
+            save("2");
+            break;
+        case 2 :
+            save("3");
+            break;
+    }
+}
+
+void loadUI()
+{
+    arrow_counter = 0;
+    int counter_temp = 1;
+    while (TRUE)
+    {
+        arrow(4);
+        if(counter_temp != arrow_counter){
+        system("cls");
+        puts("");
+        print("                           ", 2, 1);
+        print("   Ultimate Team Manager   ", 2, 1);
+        print("                           ", 2, 1);
+        puts("");
+        switch (arrow_counter)
+        {
+            case 0 :
+                print("                           ", 1, 1);
+                print("       Load Autosave       ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 1        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 2        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 3        ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 1 :
+                print("                           ", 0, 1);
+                print("       Load Autosave       ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        Load Slot 1        ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 2        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 3        ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 2 :
+                print("                           ", 0, 1);
+                print("       Load Autosave       ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 1        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        Load Slot 2        ", 1, 1);
+                print("                           ", 1, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 3        ", 0, 1);
+                print("                           ", 0, 1);
+                break;
+            case 3:
+                print("                           ", 0, 1);
+                print("       Load Autosave       ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 1        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 0, 1);
+                print("        Load Slot 2        ", 0, 1);
+                print("                           ", 0, 1);
+                print("                           ", 1, 1);
+                print("        Load Slot 3        ", 1, 1);
+                print("                           ", 1, 1);
+                break;
+            }
+        }
+        counter_temp = arrow_counter;
+        int isReturnPressed = GetAsyncKeyState(VK_RETURN) & 0x8000;
+        if (isReturnPressed)
+            break;
+    }
+    switch (arrow_counter)
+    {
+        case 0 :
+            load("Autosave");
+            break;
+        case 1 :
+            load("1");
+            break;
+        case 2 :
+            load("2");
+            break;
+        case 3 :
+            load("3");
+            break;
+    }
 }
 
 int windowsWindowWidth(int type)
@@ -641,7 +854,7 @@ void importTeam(char* team_name)
 		exit(-1);
 	}
 	//added this line
-	strcpy(Teams[j].name , team_name);
+	strcpy(teams[j].name , team_name);
 	char tmp[200];
 	char * ptr;
 	int k = 0;
@@ -649,7 +862,7 @@ void importTeam(char* team_name)
 	while (fgets(tmp, 200, fh) != NULL)
 	{
 		ptr = tmp;
-		sscanf(tmp, "%d,", &Teams[j].players[k].number);
+		sscanf(tmp, "%d,", &teams[j].players[k].number);
 		for (i = 0; tmp[i] != ','; i++);
 		ptr += (i + 1);
 		char fullname[100];
@@ -657,12 +870,560 @@ void importTeam(char* team_name)
 			fullname[i] = ptr[i];
 		}
 		fullname[i] = '\0';
-		strcpy(Teams[j].players[k].name, fullname);
+		strcpy(teams[j].players[k].name, fullname);
 		ptr += (i + 1);
-		sscanf(ptr, "%d,%c,%d,%d,%d", &Teams[j].players[k].age, &Teams[j].players[k].original_post, &Teams[j].players[k].skill, &Teams[j].players[k].form, &Teams[j].players[k].fitness);
+		sscanf(ptr, "%d,%c,%d,%d,%d", &teams[j].players[k].age, &teams[j].players[k].original_post, &teams[j].players[k].base_skill, &teams[j].players[k].form, &teams[j].players[k].fitness);
+		teams[j].players[k].post = teams[j].players[k].original_post;
 		k++;
 	}
 	//sets the player_count field of teams[j] equal to k , which shows the "exact" number of players on each team
-	Teams[j].player_count = k;
+	teams[j].player_count = k;
+	fclose(fh);
+}
+
+void save(char* n)
+{
+	void encode(char*);
+	FILE* save;
+	if (strcmp(n, "auto") == 0)
+	{
+		save = fopen("Saves/Autosave.dat", "w+");
+		//fprintf : buncha stuff in some lines
+		fprintf(save, "%d,%d,%d\n", team_number, random, week);
+		int i, j;
+		for (i = 0; i < 16; i++)
+		{
+			fprintf(save, "%s\n", teams[i].name);
+			fprintf(save, "%d,%d,%d,%d,%d,%d,%d,%d\n", teams[i].formation, teams[i].goals_for, teams[i].goals_against, teams[i].win, teams[i].lose, teams[i].draw, teams[i].point, teams[i].player_count);
+			for (j = 0; j < teams[i].player_count; j++)
+			{
+				fprintf(save, "%s\n", teams[i].players[j].name);
+				fprintf(save, "%d,%d,%d,%d,%d,%c,%c\n", teams[i].players[j].age, teams[i].players[j].number, teams[i].players[j].base_skill, teams[i].players[j].form, teams[i].players[j].fitness, teams[i].players[j].original_post, teams[i].players[j].post);
+				fprintf(save, "%d\n", teams[i].is_player_selected[j]);
+			}
+            int k;
+			for (k = 0; k < 11; k++)
+			{
+				fprintf(save, "%s\n", teams[i].fix_players[k].name);
+				fprintf(save, "%d,%d,%d,%d,%d,%c,%c", teams[i].fix_players[k].age, teams[i].fix_players[k].number, teams[i].fix_players[k].base_skill, teams[i].fix_players[k].form, teams[i].fix_players[k].fitness, teams[i].fix_players[k].original_post, teams[i].fix_players[k].post);
+			}
+			fprintf(save, "\n");
+		}
+		encode("Autosave.dat");
+	}
+	else
+	{
+		char path[100];
+		strcpy(path, "Saves/Save");
+		strcat(strcat(path, n), ".dat");
+		save = fopen(path, "w+");
+		//fprintf : buncha stuff in some lines
+		fprintf(save, "%d,%d,%d\n", team_number, random, week);
+		int i;
+		for (i = 0; i < 16; i++)
+		{
+			fprintf(save, "%s\n", teams[i].name);
+			fprintf(save, "%d,%d,%d,%d,%d,%d,%d,%d\n", teams[i].formation, teams[i].goals_for, teams[i].goals_against, teams[i].win, teams[i].lose, teams[i].draw, teams[i].point, teams[i].player_count);
+			int j;
+			for (j = 0; j < teams[i].player_count; j++)
+			{
+				fprintf(save, "%s\n", teams[i].players[j].name);
+				fprintf(save, "%d,%d,%d,%d,%d,%c,%c\n", teams[i].players[j].age, teams[i].players[j].number, teams[i].players[j].base_skill, teams[i].players[j].form, teams[i].players[j].fitness, teams[i].players[j].original_post, teams[i].players[j].post);
+				fprintf(save, "%d\n", teams[i].is_player_selected[j]);
+			}
+			for (j = 0; j < 11; j++)
+			{
+				fprintf(save, "%s\n", teams[i].fix_players[j].name);
+				fprintf(save, "%d,%d,%d,%d,%d,%c,%c\n", teams[i].fix_players[j].age, teams[i].fix_players[j].number, teams[i].fix_players[j].base_skill, teams[i].fix_players[j].form, teams[i].fix_players[j].fitness, teams[i].fix_players[j].original_post, teams[i].fix_players[j].post);
+			}
+		}
+		char tmp_encode[100];
+		strcpy(tmp_encode, "Save");
+		strcat(tmp_encode, n);
+		strcat(tmp_encode, ".dat");
+		//encode(tmp_encode);
+	}
+	fclose(save);
+}
+
+void load(char* n)
+{
+	void decode(char*);
+	FILE* load;
+	//three save slots
+	if (strcmp(n, "1") == 0)
+	{
+		//saveslot no. 1
+		decode("Save1.dat");
+		load = fopen("Saves/Save1.dat", "r+");
+	}
+	else if (strcmp(n, "2") == 0)
+	{
+		//saveslot no. 2
+		decode("Save2.dat");
+		load = fopen("Saves/Save2.dat", "r+");
+	}
+	else if (strcmp(n, "3") == 0)
+	{
+		//saveslot no. 3
+		decode("Save3.dat");
+		load = fopen("Saves/Save3.dat", "r+");
+	}
+	else
+	{
+		//autosave case
+		decode("Autosave.dat");
+		load = fopen("Saves/Autosave.dat", "r+");
+	}
+	//fopen a file
+	//fgets the lines and store them into the current structs
+	char buffer[100];
+	fgets(buffer, 100, load);
+	sscanf(buffer, "%d,%d,%d", &team_number, &random, &week);
+	int i, j;
+	for (i = 0; i < 16; i++)
+	{
+		fgets(buffer, 100, load);
+		strcpy(teams[i].name, buffer);
+		teams[i].name[strlen(teams[i].name)] = '\0';
+		fgets(buffer, 100, load);
+		sscanf(buffer, "%d,%d,%d,%d,%d,%d,%d,%d", &teams[i].formation, &teams[i].goals_for, &teams[i].goals_against, &teams[i].win, &teams[i].lose, &teams[i].draw, &teams[i].point, &teams[i].player_count);
+		for (j = 0; j < teams[i].player_count; j++)
+		{
+			fgets(buffer, 100, load);
+			strcpy(teams[i].players[j].name, buffer);
+            teams[i].players[j].name[strlen(teams[i].players[j].name)] = '\0';
+			fgets(buffer, 100, load);
+			sscanf(buffer, "%d,%d,%d,%d,%d,%c,%c", &teams[i].players[j].age, &teams[i].players[j].number, &teams[i].players[j].base_skill, &teams[i].players[j].form, &teams[i].players[j].fitness, &teams[i].players[j].original_post, &teams[i].players[j].post);
+			fgets(buffer, 100, load);
+			sscanf(buffer, "%d", &teams[i].is_player_selected[j]);
+		}
+		for (j = 0; j < 11; j++)
+		{
+			fgets(buffer, 100, load);
+			strcpy(teams[i].fix_players[j].name, buffer);
+            teams[i].fix_players[j].name[strlen(teams[i].fix_players[j].name)] = '\0';
+			fgets(buffer, 100, load);
+			sscanf(buffer, "%d,%d,%d,%d,%d,%c,%c", &teams[i].fix_players[j].age, &teams[i].fix_players[j].number, &teams[i].fix_players[j].base_skill, &teams[i].fix_players[j].form, &teams[i].fix_players[j].fitness, &teams[i].fix_players[j].original_post, &teams[i].fix_players[j].post);
+		}
+	}
+	fclose(load);
+}
+
+void autosave()
+{
+	//ATTENTION MEHRDAD!!! : after each proceed , the game automatically saves itself, cool?
+	save("auto");
+}
+
+void encode(char* file_name)
+{
+	char path[100];
+	strcpy(path, "Saves/");
+	strcat(path, file_name);
+	FILE* fh = fopen(path, "r+");
+	char tmp[100];
+	while (fgets(tmp, 100, fh) != NULL)
+	{
+		int i;
+		for (i = 0; tmp[i] != '\0'; i++)
+		{
+			tmp[i] += 10;
+		}
+		fprintf(fh, "%s", tmp);
+		fseek(fh, 0, SEEK_END);
+	}
+	fclose(fh);
+}
+
+void decode(char* file_name)
+{
+	char path[100];
+	strcpy(path, "Saves/");
+	strcat(path, file_name);
+	FILE* fh = fopen(path, "r+");
+	char tmp[100];
+	while (fgets(tmp, 100, fh) != NULL)
+	{
+		int i;
+		for (i = 0; tmp[i] != '\0'; i++)
+		{
+			tmp[i] -= 10;
+		}
+		fprintf(fh, "%s", tmp);
+		fseek(fh, 0, SEEK_END);
+	}
+	fclose(fh);
+}
+
+void swapPlayers(int team_num, int player1, int player2)//swap 2 players attributes
+{
+	char name_temp[100], post_temp;
+	int int_temp;
+	//name change
+	strcpy(name_temp, teams[team_num].players[player1].name);
+	strcpy(teams[team_num].players[player1].name, teams[team_num].players[player2].name);
+	strcpy(teams[team_num].players[player2].name, name_temp);
+	//post change
+	post_temp = teams[team_num].players[player1].original_post;
+	teams[team_num].players[player1].original_post = teams[team_num].players[player2].original_post;
+	teams[team_num].players[player2].original_post = post_temp;
+
+	post_temp = teams[team_num].players[player1].post;
+	teams[team_num].players[player1].post = teams[team_num].players[player2].post;
+	teams[team_num].players[player2].post = post_temp;
+
+	//age change
+	int_temp = teams[team_num].players[player1].age;
+	teams[team_num].players[player1].age = teams[team_num].players[player2].age;
+	teams[team_num].players[player2].age = int_temp;
+	//number change
+	int_temp = teams[team_num].players[player1].number;
+	teams[team_num].players[player1].number = teams[team_num].players[player2].number;
+	teams[team_num].players[player2].number = int_temp;
+	//skill change
+	int_temp = teams[team_num].players[player1].skill;
+	teams[team_num].players[player1].skill = teams[team_num].players[player2].skill;
+	teams[team_num].players[player2].skill = int_temp;
+	//base skill change
+	int_temp = teams[team_num].players[player1].base_skill;
+	teams[team_num].players[player1].base_skill = teams[team_num].players[player2].base_skill;
+	teams[team_num].players[player2].base_skill = int_temp;
+	//fitness
+	int_temp = teams[team_num].players[player1].fitness;
+	teams[team_num].players[player1].fitness = teams[team_num].players[player2].fitness;
+	teams[team_num].players[player2].fitness = int_temp;
+	//form
+	int_temp = teams[team_num].players[player1].form;
+	teams[team_num].players[player1].form = teams[team_num].players[player2].form;
+	teams[team_num].players[player2].form = int_temp;
+}
+int playerOverall(int team_num, int player_num)//calculates player overall
+{
+	return (0.5 * teams[team_num].players[player_num].base_skill + 0.3 * teams[team_num].players[player_num].form + 0.2 * teams[team_num].players[player_num].fitness);
+}
+void teamSort(int team_num)//sort the team
+{
+	int i, j;
+	for (i = 0; i < teams[team_num].player_count; i++)
+	{
+		for(j = i + 1; j < teams[team_num].player_count; j++)
+		{
+			if(playerOverall(team_num, i) < playerOverall(team_num, j))
+				swapPlayers(team_num, i, j);
+		}
+	}
+	switch(teams[team_num].formation)
+	{
+		case 0 ://4-4-2
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'G')
+				{
+					strcpy(teams[team_num].fix_players[0].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[0].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[0].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[0].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[0].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[0].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[0].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[0].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[0].number = teams[team_num].players[i].number;
+					break;
+				}
+			}
+			j = 1;
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'D')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 5)
+						break;
+				}
+			}
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'M')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 9)
+						break;
+				}
+			}
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'A')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 11)
+						break;
+				}
+			}
+			break;
+		case 1 ://4-3-3
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'G')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[0].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[0].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[0].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[0].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[0].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[0].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[0].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[0].number = teams[team_num].players[i].number;
+					break;
+				}
+			}
+			j = 1;
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'D')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 5)
+						break;
+				}
+			}
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'M')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 8)
+						break;
+				}
+			}
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'A')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 11)
+						break;
+				}
+			}
+			break;
+		case 2 ://5-4-1
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'G')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[0].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[0].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[0].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[0].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[0].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[0].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[0].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[0].number = teams[team_num].players[i].number;
+					break;
+				}
+			}
+			j = 1;
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'D')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 5)
+						break;
+				}
+			}
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'M')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 10)
+						break;
+				}
+			}
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'A')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 11)
+						break;
+				}
+			}
+			break;
+		case 3 ://3-5-2
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'G')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[0].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[0].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[0].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[0].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[0].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[0].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[0].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[0].number = teams[team_num].players[i].number;
+					break;
+				}
+			}
+			j = 1;
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'D')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 4)
+						break;
+				}
+			}
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'M')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 9)
+						break;
+				}
+			}
+			for(i = 0 ; i < teams[team_num].player_count ; i++)
+			{
+				if(teams[team_num].players[i].post == 'A')
+				{
+				    strcpy(teams[team_num].fix_players[j].name, teams[team_num].players[i].name);
+					teams[team_num].fix_players[j].original_post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].post = teams[team_num].players[i].post;
+					teams[team_num].fix_players[j].age = teams[team_num].players[i].age;
+				 	teams[team_num].fix_players[j].skill = teams[team_num].players[i].skill;
+					teams[team_num].fix_players[j].base_skill = teams[team_num].players[i].base_skill;
+					teams[team_num].fix_players[j].fitness = teams[team_num].players[i].fitness;
+					teams[team_num].fix_players[j].form = teams[team_num].players[i].form;
+					teams[team_num].fix_players[j].number = teams[team_num].players[i].number;
+					j++;
+					if (j == 11)
+						break;
+				}
+			}
+			break;
+	}
+}
+
+void leagueImport()
+{
+	FILE* fh = fopen("Teams/League_Schedule.csv", "r");
+	if (!fh)
+	{
+		perror("Can't Open File: ");
+		exit(-1);
+	}
+	char buffer[10];
+	int tmp, i = 0;
+	while (fgets(buffer , 10 , fh) != NULL)
+	{
+		sscanf(buffer ,"%d,%d,%d", &tmp, &home[i], &away[i]);
+		i++;
+	}
 	fclose(fh);
 }
